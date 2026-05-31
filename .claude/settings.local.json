@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 *)",
+      "Bash(pip3 install *)",
+      "Bash(/tmp/.xlvenv/bin/pip install *)",
+      "Bash(/tmp/.xlvenv/bin/python3 -c ' *)",
+      "Bash(.venv/bin/pip install *)",
+      "Bash(.venv/bin/python3 *)",
+      "Bash(.venv/bin/playwright install *)",
+      "Bash(python *)",
+      "Bash(pip3 list *)",
+      "Bash(sips --getProperty all \"/Users/xinsong/SIde_Project/automation_app/screenshots/07_carrier_error_20260529-223806.png\")",
+      "Bash(.venv/bin/python *)",
+      "Bash(/Users/xinsong/SIde_Project/automation_app/.venv/Scripts/python -c \"import py_compile; py_compile.compile\\('automation/full_signin.py', doraise=True\\)\")",
+      "Bash(pyinstaller --version)",
+      "Bash(timeout 5 ./run.sh)",
+      "Bash(gh auth *)",
+      "Bash(git init *)",
+      "Bash(brew --version)",
+      "Bash(brew install *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}

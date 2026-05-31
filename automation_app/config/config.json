@@ -1,0 +1,8 @@
+{
+  "excel_path": "data/游戏验证.xlsx",
+  "headless": false,
+  "captcha_timeout_seconds": 120,
+  "typing_delay_ms": 50,
+  "navigation_timeout_ms": 30000,
+  "debug": false
+}
