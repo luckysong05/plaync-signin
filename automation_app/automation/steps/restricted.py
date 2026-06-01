@@ -11,7 +11,7 @@ from typing import Callable, Optional
 from playwright.sync_api import Page
 
 from ..captcha_handler import detect_captcha, wait_for_captcha_solve
-from ._helpers import sleep, human_click, human_type, save_debug_screenshot
+from ._helpers import sleep, human_click, paste_text, save_debug_screenshot
 
 logger = logging.getLogger(__name__)
 
@@ -95,8 +95,8 @@ def step_handle_restricted_account(
                     el.click()
                 sleep(0.2, 0.5)
                 el.fill("")
-                sleep(0.1, 0.3)
-                human_type(page, email)
+                sleep(0.1, 0.2)
+                paste_text(page, email)
                 logger.info("Email filled for restricted account verification")
                 email_filled = True
                 break
@@ -123,8 +123,8 @@ def step_handle_restricted_account(
                         el.click()
                     sleep(0.2, 0.5)
                     el.fill("")
-                    sleep(0.1, 0.3)
-                    human_type(page, phone if phone else email)
+                    sleep(0.1, 0.2)
+                    paste_text(page, phone if phone else email)
                     logger.info("Phone filled for restricted account verification")
                     email_filled = True
                     break

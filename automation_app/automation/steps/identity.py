@@ -11,7 +11,7 @@ from playwright.sync_api import Page
 
 from ._helpers import (
     DELAY_MEDIUM, DELAY_LONG,
-    sleep, human_type, human_click, _click_el, _find_first,
+    sleep, paste_text, human_click, _click_el, _find_first,
     _dump_fields, _user_continue, save_debug_screenshot,
 )
 
@@ -354,8 +354,8 @@ def step_fill_identity_form(
         _click_el(page, el)
         sleep(0.2, 0.5)
         el.fill("")
-        sleep(0.1, 0.3)
-        human_type(page, value)
+        sleep(0.1, 0.2)
+        paste_text(page, value)
         logger.info("%s filled: %s", field_name, value)
         if has_next:
             sleep(0.5, 1.0)

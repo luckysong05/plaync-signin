@@ -22,9 +22,6 @@ DELAY_SHORT = (0.5, 1.5)
 DELAY_MEDIUM = (1.0, 3.0)
 DELAY_LONG = (2.0, 4.0)
 
-TYPING_MIN_MS = 50
-TYPING_MAX_MS = 150
-
 
 # --- Core helpers ---
 
@@ -37,9 +34,9 @@ def sleep(a: float = 0.5, b: float = 1.5):
     time.sleep(_rand(a, b))
 
 
-def human_type(page: Page, text: str, delay_ms: tuple[int, int] = (TYPING_MIN_MS, TYPING_MAX_MS)):
-    for char in text:
-        page.keyboard.type(char, delay=random.randint(*delay_ms))
+def paste_text(page: Page, text: str):
+    """Insert text instantly at cursor position. Replaces char-by-char typing."""
+    page.keyboard.insert_text(text)
 
 
 def _get_mouse_pos(page: Page) -> tuple[int, int]:

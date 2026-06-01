@@ -9,7 +9,7 @@ from playwright.sync_api import Page
 
 from ._helpers import (
     LOGIN_URL, DELAY_MEDIUM, DELAY_LONG,
-    sleep, human_type, human_click, save_debug_screenshot, _random_scroll,
+    sleep, paste_text, human_click, save_debug_screenshot, _random_scroll,
 )
 
 logger = logging.getLogger(__name__)
@@ -52,8 +52,8 @@ def step_fill_email(page: Page, email: str):
 
     sleep(0.3, 0.8)
     email_el.fill("")
-    sleep(0.2, 0.5)
-    human_type(page, email)
+    sleep(0.1, 0.2)
+    paste_text(page, email)
     sleep(*DELAY_MEDIUM)
 
 
@@ -123,8 +123,8 @@ def step_fill_password(page: Page, password: str):
 
     sleep(0.3, 0.8)
     pw_el.fill("")
-    sleep(0.2, 0.5)
-    human_type(page, password)
+    sleep(0.1, 0.2)
+    paste_text(page, password)
     sleep(*DELAY_MEDIUM)
 
 
