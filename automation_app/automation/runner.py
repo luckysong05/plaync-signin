@@ -101,6 +101,9 @@ class Runner:
             self.on_status("Launching browser...")
             client = PlaywrightClient(
                 headless=self.config.get("headless", False),
+                window_width=self.config.get("window_width", 700),
+                window_height=self.config.get("window_height", 780),
+                instance_id=self.config.get("instance_id"),
             )
             page = client.start()
             self.on_log("Browser ready")

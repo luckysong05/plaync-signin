@@ -40,8 +40,12 @@ def _setup_bundled_browser():
 class PlaywrightClient:
     """Manages Playwright browser instance. Fresh context each time."""
 
-    def __init__(self, headless: bool = False):
+    def __init__(self, headless: bool = False, window_width: int = 700, window_height: int = 780,
+                 instance_id: int | None = None):
         self.headless = headless
+        self.window_width = window_width
+        self.window_height = window_height
+        self.instance_id = instance_id
         self._playwright = None
         self.browser: Optional[Browser] = None
         self.context: Optional[BrowserContext] = None
@@ -54,7 +58,7 @@ class PlaywrightClient:
         self.browser = self._playwright.chromium.launch(
             headless=self.headless,
             args=[
-                "--start-maximized",
+                f"--window-size={self.window_width},{self.window_height}",
                 "--disable-blink-features=AutomationControlled",
             ],
         )
@@ -73,6 +77,12 @@ class PlaywrightClient:
         self.page.add_init_script(
             "Object.defineProperty(navigator, 'webdriver', {get: () => undefined});"
         )
+
+        if self.instance_id is not None:
+            self.page.on("load", lambda: self.page.evaluate(
+                f"document.title = '[{self.instance_id}] ' + document.title"
+            ))
+
         return self.page
 
     def close(self):

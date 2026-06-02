@@ -35,8 +35,8 @@ class MainWindow(ctk.CTk):
     def _setup_window(self):
         setup_theme()
         self.title("PlayNC Sign-In Automation")
-        self.geometry("700x780")
-        self.minsize(600, 700)
+        self.geometry("400x600")
+        self.minsize(400, 600)
 
     # ── Build UI sections ──────────────────────────────────────────
 
@@ -297,7 +297,12 @@ class MainWindow(ctk.CTk):
         self.error_frame.grid_remove()
 
         self.runner = Runner(
-            config={**self.config, "excel_path": self.excel_path_var.get()},
+            config={
+                **self.config,
+                "excel_path": self.excel_path_var.get(),
+                "window_width": self.winfo_width(),
+                "window_height": self.winfo_height(),
+            },
             callbacks={
                 "on_log": self._log,
                 "on_status": self._set_status,

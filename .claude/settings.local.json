@@ -21,7 +21,9 @@
       "Bash(brew install *)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(gh repo *)"
+      "Bash(gh repo *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }

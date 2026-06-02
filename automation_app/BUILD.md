@@ -54,6 +54,7 @@ Send `PlayNC-mac.zip` to users.
 - Unzip
 - Right-click `run.sh` → Open → "Open" in dialog (Gatekeeper warning — first time only)
 - Or in Terminal: `./run.sh`
+- **Multiple instances**: `./run.sh 3` opens 3 GUIs. Without a number, a popup asks how many to open.
 
 ---
 
@@ -104,6 +105,7 @@ Send `PlayNC.zip` to users.
 - Unzip
 - Double-click `run.bat`
 - No warnings, no extra steps
+- **Multiple instances**: `run.bat 3` opens 3 GUIs. Without a number, a popup asks how many to open.
 
 ---
 
