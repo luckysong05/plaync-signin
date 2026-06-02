@@ -41,10 +41,13 @@ class PlaywrightClient:
     """Manages Playwright browser instance. Fresh context each time."""
 
     def __init__(self, headless: bool = False, window_width: int = 700, window_height: int = 780,
+                 window_x: int | None = None, window_y: int | None = None,
                  instance_id: int | None = None):
         self.headless = headless
         self.window_width = window_width
         self.window_height = window_height
+        self.window_x = window_x
+        self.window_y = window_y
         self.instance_id = instance_id
         self._playwright = None
         self.browser: Optional[Browser] = None
@@ -55,12 +58,15 @@ class PlaywrightClient:
         """Launch browser with anti-detection args, create context and page."""
         _setup_bundled_browser()
         self._playwright = sync_playwright().start()
+        args = [
+            f"--window-size={self.window_width},{self.window_height}",
+            "--disable-blink-features=AutomationControlled",
+        ]
+        if self.window_x is not None and self.window_y is not None:
+            args.append(f"--window-position={self.window_x},{self.window_y}")
         self.browser = self._playwright.chromium.launch(
             headless=self.headless,
-            args=[
-                f"--window-size={self.window_width},{self.window_height}",
-                "--disable-blink-features=AutomationControlled",
-            ],
+            args=args,
         )
         self.context = self.browser.new_context(
             no_viewport=True,

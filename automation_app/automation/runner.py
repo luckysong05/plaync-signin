@@ -103,6 +103,8 @@ class Runner:
                 headless=self.config.get("headless", False),
                 window_width=self.config.get("window_width", 700),
                 window_height=self.config.get("window_height", 780),
+                window_x=self.config.get("window_x"),
+                window_y=self.config.get("window_y"),
                 instance_id=self.config.get("instance_id"),
             )
             page = client.start()

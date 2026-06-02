@@ -18,7 +18,16 @@ logger = logging.getLogger(__name__)
 def step_navigate(page: Page):
     logger.info("[Step 1] Navigate to login page")
     page.goto(LOGIN_URL, wait_until="domcontentloaded", timeout=30000)
-    page.reload(wait_until="domcontentloaded")
+
+    # Dismiss cookie consent banner (NCsoft)
+    try:
+        btn = page.locator('button:has-text("Agree to All")').first
+        btn.wait_for(state="visible", timeout=3000)
+        btn.click()
+        logger.info("Cookie consent accepted")
+    except Exception:
+        pass
+
     _random_scroll(page)
 
 

@@ -67,6 +67,19 @@ def detect_captcha(page: Page) -> bool:
     return False
 
 
+def _is_recaptcha_solved(page: Page) -> bool:
+    """Check if reCAPTCHA has a response token (user solved it)."""
+    try:
+        token = page.evaluate(
+            "() => document.querySelector('#g-recaptcha-response')?.value "
+            "|| document.querySelector('[name=\"g-recaptcha-response\"]')?.value "
+            "|| ''"
+        )
+        return bool(token and len(token) > 50)
+    except Exception:
+        return False
+
+
 def wait_for_captcha_solve(
     page: Page,
     timeout: int = 120,
@@ -86,6 +99,10 @@ def wait_for_captcha_solve(
 
         if not detect_captcha(page):
             logger.info("CAPTCHA: disappeared from page")
+            return True
+
+        if _is_recaptcha_solved(page):
+            logger.info("CAPTCHA: reCAPTCHA response token detected — user solved it")
             return True
 
         time.sleep(1)

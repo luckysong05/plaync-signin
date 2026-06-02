@@ -298,7 +298,7 @@ def step_fill_identity_form(
     _dump_fields(page, None, "identity_form_initial")
 
     def _fill_and_next(field_name, value, selectors, has_next=True):
-        el = _find_first(page, None, selectors, timeout=5000)
+        el = _find_first(page, None, selectors, timeout=2000)
         if not el:
             logger.warning("%s field not found", field_name)
             return False
@@ -356,15 +356,15 @@ def step_fill_identity_form(
 
     # Name (page 1 → Next to page 2)
     if not _fill_and_next("name", name, [
-        'input[name="username"]', '#sms_username', 'input[id*="sms_"]',
         'input[placeholder*="이름"]', 'input[class*="userName"]',
+        'input[name="username"]', '#sms_username', 'input[id*="sms_"]',
         'input[name="name"]', 'input[id*="name"]',
     ]):
         raise RuntimeError("Name field not found in identity form")
 
     # Birthday → Tab → sex → phone (same page)
     bday_ok = _fill_and_next("birthday", birthday, [
-        '#myNum1', 'input.myNum1', 'input[placeholder*="생년월일"]',
+        'input[placeholder*="생년월일"]', '#myNum1', 'input.myNum1',
         'input[placeholder*="Birth"]', 'input[id*="myNum"]',
         'input[name*="birth"]', 'input[maxlength="8"]', 'input[maxlength="10"]',
     ], has_next=False)
@@ -376,8 +376,8 @@ def step_fill_identity_form(
     sleep(0.2, 0.3)
 
     sex_ok = _fill_and_next("sex", str(sex), [
-        '#myNum2', 'input.myNum2', 'input[class*="myNum2"]',
-        'input[placeholder*="gender"]', 'input[maxlength="1"]',
+        'input[placeholder*="gender"]', '#myNum2', 'input.myNum2',
+        'input[class*="myNum2"]', 'input[maxlength="1"]',
         'input[type="tel"]:not(#myNum1)',
     ], has_next=False)
     if not sex_ok:
@@ -387,8 +387,8 @@ def step_fill_identity_form(
     sleep(0.5, 1.0)
     _dump_fields(page, None, "after_birthday_sex")
     phone_ok = _fill_and_next("phone", phone, [
-        '#sms_mobileno', 'input[name="mobileno"]',
         'input[placeholder*="휴대폰"]',
+        '#sms_mobileno', 'input[name="mobileno"]',
         'input[id*="phone"]', 'input[name*="phone"]',
         'input[placeholder*="Phone"]', 'input[name*="mobile"]',
         'input[type="tel"]:not(#myNum1):not(#myNum2)',

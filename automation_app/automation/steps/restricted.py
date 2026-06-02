@@ -10,7 +10,7 @@ from typing import Callable, Optional
 
 from playwright.sync_api import Page
 
-from ..captcha_handler import detect_captcha, wait_for_captcha_solve
+from ..captcha_handler import detect_captcha
 from ._helpers import sleep, human_click, paste_text, save_debug_screenshot
 
 logger = logging.getLogger(__name__)
@@ -64,9 +64,12 @@ def step_handle_restricted_account(
     if detect_captcha(page):
         logger.info("CAPTCHA challenge in restricted account flow")
         save_debug_screenshot(page, "09a_restrict_captcha")
-        solved = wait_for_captcha_solve(page, on_detected=on_captcha, solved_event=captcha_solved)
-        if not solved:
-            logger.warning("CAPTCHA timeout in restricted account flow — continuing anyway")
+        if on_captcha:
+            on_captcha()
+        if captcha_solved:
+            captcha_solved.wait()
+            captcha_solved.clear()
+            logger.info("Restricted CAPTCHA confirmed via Continue button")
 
     # Fill email or phone form
     logger.info("Looking for email/phone confirmation form")

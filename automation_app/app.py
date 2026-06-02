@@ -87,7 +87,14 @@ def _run_instance(instance_id: int, config: dict):
     root = logging.getLogger()
     root.addHandler(handler)
 
-    config = {**config, "instance_id": instance_id}
+    # Offset each window so they don't stack
+    cols = 4
+    col = (instance_id - 1) % cols
+    row = (instance_id - 1) // cols
+    window_x = col * 420
+    window_y = row * 620
+
+    config = {**config, "instance_id": instance_id, "window_x": window_x, "window_y": window_y}
     app = MainWindow(config)
     app.title(f"PlayNC Sign-In Automation [{instance_id}]")
     app.mainloop()

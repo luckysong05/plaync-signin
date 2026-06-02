@@ -15,7 +15,7 @@ from typing import Callable, Optional
 from playwright.sync_api import Page
 
 from .steps._helpers import (
-    LOGIN_URL, save_debug_screenshot, _dump_fields, _check_captcha, _user_continue,
+    LOGIN_URL, save_debug_screenshot, _dump_fields, _check_captcha,
 )
 from .steps.login import (
     step_navigate, step_fill_email, step_click_login_button,
@@ -108,10 +108,10 @@ def full_signin(
         pass
 
     if identity_detected:
-        logger.info("[Step 7] Identity verification page detected — manual CAPTCHA popup")
+        logger.info("[Step 7] Identity verification page detected — checking for CAPTCHA")
         save_debug_screenshot(page, "06_identity_verify")
         _dump_fields(page, None, "identity_verify")
-        _user_continue(on_captcha, captcha_solved, "identity verification")
+        _check_captcha(page, on_captcha, captcha_solved, "identity verification")
         _dump_fields(page, None, "after_identity_verify")
 
     # First Pass → dismiss popups → carrier → SMS → identity form
