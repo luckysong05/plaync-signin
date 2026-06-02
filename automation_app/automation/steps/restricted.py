@@ -60,8 +60,6 @@ def step_handle_restricted_account(
         logger.info("No restricted account flow detected — continuing")
         return False
 
-    sleep(1.0, 2.0)
-
     # CAPTCHA challenge (if present)
     if detect_captcha(page):
         logger.info("CAPTCHA challenge in restricted account flow")
@@ -70,11 +68,8 @@ def step_handle_restricted_account(
         if not solved:
             logger.warning("CAPTCHA timeout in restricted account flow — continuing anyway")
 
-    sleep(0.5, 1.5)
-
     # Fill email or phone form
     logger.info("Looking for email/phone confirmation form")
-    sleep(1.0, 2.0)
 
     email_filled = False
     email_sel = [
@@ -135,7 +130,7 @@ def step_handle_restricted_account(
         logger.warning("Could not find email or phone field for restricted account")
 
     # Click Confirm/Submit
-    sleep(0.5, 1.5)
+    sleep(0.3, 0.8)
     confirm_selectors = [
         'button:has-text("Confirm")', 'button:has-text("confirm")',
         'button:has-text("Submit")', 'button:has-text("submit")',
@@ -161,7 +156,7 @@ def step_handle_restricted_account(
         logger.warning("Confirm/Submit button not found for restricted account")
 
     # Click Complete button
-    sleep(1.0, 2.0)
+    sleep(0.3, 0.8)
     complete_selectors = [
         'button:has-text("Complete")', 'button:has-text("complete")',
         'button:has-text("Confirm")', 'button:has-text("confirm")',
@@ -187,6 +182,6 @@ def step_handle_restricted_account(
     else:
         logger.warning("Complete button not found — may not be needed")
 
-    sleep(2.0, 4.0)
+    sleep(0.5, 1.0)
     logger.info("Restricted account flow completed")
     return True

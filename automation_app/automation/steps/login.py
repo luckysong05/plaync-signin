@@ -8,7 +8,7 @@ import random
 from playwright.sync_api import Page
 
 from ._helpers import (
-    LOGIN_URL, DELAY_MEDIUM, DELAY_LONG,
+    LOGIN_URL,
     sleep, paste_text, human_click, save_debug_screenshot, _random_scroll,
 )
 
@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 def step_navigate(page: Page):
     logger.info("[Step 1] Navigate to login page")
     page.goto(LOGIN_URL, wait_until="domcontentloaded", timeout=30000)
+    page.reload(wait_until="domcontentloaded")
     _random_scroll(page)
-    sleep(*DELAY_MEDIUM)
 
 
 def step_fill_email(page: Page, email: str):
@@ -54,7 +54,6 @@ def step_fill_email(page: Page, email: str):
     email_el.fill("")
     sleep(0.1, 0.2)
     paste_text(page, email)
-    sleep(*DELAY_MEDIUM)
 
 
 def step_click_login_button(page: Page):
@@ -87,10 +86,9 @@ def step_click_login_button(page: Page):
 
     # Wait for password field instead of networkidle
     try:
-        page.locator('input[type="password"]').first.wait_for(state="visible", timeout=15000)
+        page.locator('input[type="password"]').first.wait_for(state="visible", timeout=10000)
     except Exception:
         logger.warning("Password field not visible after login button — continuing")
-    sleep(*DELAY_MEDIUM)
 
 
 def step_fill_password(page: Page, password: str):
@@ -125,7 +123,6 @@ def step_fill_password(page: Page, password: str):
     pw_el.fill("")
     sleep(0.1, 0.2)
     paste_text(page, password)
-    sleep(*DELAY_MEDIUM)
 
 
 def step_click_final_login(page: Page):
@@ -155,9 +152,13 @@ def step_click_final_login(page: Page):
     if not clicked:
         page.keyboard.press("Enter")
 
-    # Wait for navigation away from login page or any post-login element
+    # Wait for page to navigate away from login
     try:
-        page.wait_for_url(f"**/*", timeout=15000)
+        page.wait_for_function(
+            "() => !window.location.href.includes('nclogin/signin')",
+            timeout=15000
+        )
+        # Page navigated — ensure rendering is done
+        page.wait_for_load_state("domcontentloaded", timeout=10000)
     except Exception:
-        pass
-    sleep(*DELAY_LONG)
+        logger.info("No navigation after login (CAPTCHA or same-page state) — continuing")

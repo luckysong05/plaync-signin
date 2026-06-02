@@ -109,24 +109,23 @@ def step_select_carrier(page: Page, carrier: str):
     logger.info("[Step 9] Select carrier: %s", carrier)
 
     carrier_page_selectors = [
-        '[class*="carrier"]', '[class*="telecom"]', '[class*="통신사"]',
-        'input[type="radio"]', 'button:has-text("SKT")',
-        'button:has-text("KT")', 'button:has-text("LGU+")',
-        'button:has-text("SK")',
+        'button:has-text("SKT")', 'button:has-text("KT")',
+        'button:has-text("LGU+")', 'button:has-text("SK")',
+        'input[type="radio"]',
     ]
     carrier_found = False
     for sel in carrier_page_selectors:
         try:
-            page.locator(sel).first.wait_for(state="visible", timeout=7000)
+            page.locator(sel).first.wait_for(state="visible", timeout=3000)
             carrier_found = True
             logger.info("Carrier page loaded — element visible: '%s'", sel)
             break
         except Exception:
             continue
     if not carrier_found:
-        logger.warning("Carrier elements not found after 30s — proceeding anyway")
+        logger.warning("Carrier elements not found — proceeding anyway")
     else:
-        sleep(1.0, 2.0)
+        sleep(0.5, 1.0)
 
     carrier_map = {
         "skt": "SKT", "kt": "KT",
@@ -159,18 +158,16 @@ def step_sms_verification(page: Page):
     # Wait for cert method page
     logger.info("Waiting for certification method page...")
     cert_found = False
-    for sel in ['button.certAuthCheck', '[class*="certAuth"]', '[class*="cert"]',
-                'button:has-text("문자")', 'button:has-text("SMS")']:
+    for sel in ['[class*="cert"]', 'button:has-text("문자")', 'button:has-text("SMS")']:
         try:
-            page.locator(sel).first.wait_for(state="visible", timeout=7000)
+            page.locator(sel).first.wait_for(state="visible", timeout=3000)
             cert_found = True
             logger.info("Cert method page loaded — '%s' visible", sel)
-            sleep(1.0, 2.0)
             break
         except Exception:
             continue
     if not cert_found:
-        logger.warning("Cert method page not found after 7s — may already be past this step")
+        logger.warning("Cert method page not found — may already be past this step")
 
     sms_selectors = [
         'button:has-text("문자(SMS)")', 'button:has-text("문자")',
@@ -182,7 +179,7 @@ def step_sms_verification(page: Page):
     for sel in sms_selectors:
         try:
             el = page.locator(sel).first
-            if el.is_visible(timeout=2000):
+            if el.is_visible(timeout=1500):
                 box = el.bounding_box()
                 if box:
                     cx = int(box["x"] + box["width"] / 2 + random.uniform(-3, 3))
@@ -199,7 +196,7 @@ def step_sms_verification(page: Page):
     if not sms_clicked:
         try:
             el = page.locator('button.certAuthCheck').first
-            el.wait_for(state="visible", timeout=5000)
+            el.wait_for(state="visible", timeout=3000)
             box = el.bounding_box()
             if box:
                 cx = int(box["x"] + box["width"] / 2 + random.uniform(-3, 3))
@@ -215,16 +212,15 @@ def step_sms_verification(page: Page):
     if not sms_clicked:
         logger.warning("Could not click SMS cert method button")
     else:
-        sleep(1.0, 2.0)
-        # Wait for terms section instead of networkidle
+        sleep(0.3, 0.6)
+        # Wait for terms section
         try:
-            page.locator('input[type="checkbox"]').first.wait_for(state="visible", timeout=10000)
+            page.locator('input[type="checkbox"]').first.wait_for(state="visible", timeout=5000)
         except Exception:
             pass
 
     # Check terms agreement checkbox
     logger.info("Looking for terms checkbox")
-    sleep(1.0, 2.0)
     terms_selectors = [
         'input[type="checkbox"]', 'input[id*="agree"]', 'input[id*="terms"]',
         'input[id*="동의"]', 'label:has-text("동의")', 'span:has-text("동의")',
@@ -246,7 +242,7 @@ def step_sms_verification(page: Page):
                     else:
                         el.click()
                     logger.info("Terms checkbox checked via '%s'", sel)
-                sleep(0.5, 1.0)
+                sleep(0.3, 0.6)
                 break
         except Exception:
             continue
@@ -280,38 +276,9 @@ def step_sms_verification(page: Page):
     else:
         logger.warning("Confirm button not found after terms — proceeding")
 
-    # Wait for identity form inputs instead of networkidle
-    sleep(2.0, 4.0)
-    try:
-        page.locator('input[name="username"], #sms_username').first.wait_for(
-            state="visible", timeout=15000
-        )
-    except Exception:
-        logger.warning("Identity form inputs not visible after SMS confirm — continuing")
-    sleep(1.0, 2.0)
+    # Wait for identity iframe to appear
+    sleep(0.3, 0.6)
     save_debug_screenshot(page, "11_after_sms_confirm")
-
-
-def _find_identity_frame(page: Page):
-    """Find iframe containing identity form fields, return Frame or None."""
-    for frame_sel in ["iframe", "frame", "iframe[class*='layer']", "iframe[id*='popup']"]:
-        try:
-            iframes = page.locator(frame_sel).all()
-            for el in iframes:
-                name_attr = el.get_attribute("name") or ""
-                id_attr = el.get_attribute("id") or ""
-                src = (el.get_attribute("src") or "")[:80]
-                logger.info("Found iframe: name='%s' id='%s' src='%s'", name_attr, id_attr, src)
-                frame = el.content_frame()
-                if not frame:
-                    continue
-                inputs = frame.locator("input:visible").all()
-                if len(inputs) >= 3:
-                    logger.info("Identity form iframe found with %d inputs", len(inputs))
-                    return frame, el
-        except Exception:
-            continue
-    return None, None
 
 
 def step_fill_identity_form(
@@ -325,54 +292,39 @@ def step_fill_identity_form(
 ):
     """Fill identity form popup: name, birthday, gender, phone, request SMS."""
     logger.info("[Step 11] Fill identity form: %s, %s, sex=%d, %s", name, birthday, sex, phone)
-    sleep(*DELAY_MEDIUM)
 
-    # Wait for identity form inputs instead of networkidle
-    try:
-        page.locator('input[name="username"], #sms_username').first.wait_for(
-            state="visible", timeout=15000
-        )
-    except Exception:
-        pass
-    sleep(2.0, 3.0)
     save_debug_screenshot(page, "13_identity_form")
 
-    ctx_frame, iframe_el = _find_identity_frame(page)
-    if ctx_frame:
-        logger.info("Using iframe context for identity form")
-    else:
-        logger.info("No identity iframe found, using main page context")
-
-    _dump_fields(page, ctx_frame, "identity_form_initial")
+    _dump_fields(page, None, "identity_form_initial")
 
     def _fill_and_next(field_name, value, selectors, has_next=True):
-        el = _find_first(page, ctx_frame, selectors, timeout=5000)
+        el = _find_first(page, None, selectors, timeout=5000)
         if not el:
             logger.warning("%s field not found", field_name)
             return False
-        sleep(0.3, 0.8)
-        _click_el(page, el)
         sleep(0.2, 0.5)
+        _click_el(page, el)
+        sleep(0.1, 0.3)
         el.fill("")
         sleep(0.1, 0.2)
         paste_text(page, value)
         logger.info("%s filled: %s", field_name, value)
         if has_next:
-            sleep(0.5, 1.0)
+            sleep(0.3, 0.6)
             next_el = None
             next_selectors = [
+                '.btnUserName_sms', 'button.btn_pass',
                 'button:has-text("다음")', 'button:has-text("Next")',
                 'button:has-text("next")', 'button:has-text("확인")',
                 'button:has-text("Confirm")',
-                'button.btn_pass', '.btnUserName_sms',
                 '[class*="btn_pass"]',
             ]
-            ctx = ctx_frame if ctx_frame else page
+            ctx = page
             for sel in next_selectors:
                 try:
                     el = ctx.locator(sel).first
-                    el.wait_for(state="attached", timeout=3000)
-                    if el.is_visible(timeout=2000):
+                    el.wait_for(state="attached", timeout=2000)
+                    if el.is_visible(timeout=1000):
                         next_el = el
                         logger.info("Next button found via '%s'", sel)
                         break
@@ -381,7 +333,7 @@ def step_fill_identity_form(
             if not next_el:
                 try:
                     el = ctx.locator('button.btn_pass').first
-                    if el.is_visible(timeout=1000):
+                    if el.is_visible(timeout=800):
                         next_el = el
                         logger.info("Next button found via btn_pass class")
                 except Exception:
@@ -389,15 +341,15 @@ def step_fill_identity_form(
             if next_el:
                 _click_el(page, next_el)
                 logger.info("Next clicked after %s", field_name)
-                sleep(1.5, 2.5)
-                # Wait for next field instead of networkidle
+                sleep(0.5, 1.0)
+                # Wait for next field
                 try:
                     page.locator('#myNum1, #myNum2, #sms_mobileno').first.wait_for(
-                        state="visible", timeout=10000
+                        state="visible", timeout=5000
                     )
                 except Exception:
                     pass
-                _dump_fields(page, ctx_frame)
+                _dump_fields(page, None)
             else:
                 raise RuntimeError(f"Next button not found after {field_name}")
         return True
@@ -419,9 +371,9 @@ def step_fill_identity_form(
     if not bday_ok:
         raise RuntimeError("Birthday field not found in identity form")
 
-    sleep(0.3, 0.6)
+    sleep(0.2, 0.3)
     page.keyboard.press("Tab")
-    sleep(0.3, 0.6)
+    sleep(0.2, 0.3)
 
     sex_ok = _fill_and_next("sex", str(sex), [
         '#myNum2', 'input.myNum2', 'input[class*="myNum2"]',
@@ -432,8 +384,8 @@ def step_fill_identity_form(
         raise RuntimeError("Sex field not found in identity form")
 
     # Phone appears dynamically after birthday/sex
-    sleep(1.0, 2.0)
-    _dump_fields(page, ctx_frame, "after_birthday_sex")
+    sleep(0.5, 1.0)
+    _dump_fields(page, None, "after_birthday_sex")
     phone_ok = _fill_and_next("phone", phone, [
         '#sms_mobileno', 'input[name="mobileno"]',
         'input[placeholder*="휴대폰"]',
@@ -447,11 +399,9 @@ def step_fill_identity_form(
         raise RuntimeError("Phone field not found in identity form")
 
     # Always pause for manual CAPTCHA check after phone
-    sleep(0.5, 1.0)
     _user_continue(on_captcha, captcha_solved, "after phone entry")
 
     # Click Next/Continue after CAPTCHA
-    sleep(0.5, 1.0)
     logger.info("Clicking Next/Continue after CAPTCHA")
     next_sel = [
         'button:has-text("다음")', 'button:has-text("Next")', 'button:has-text("next")',
@@ -462,11 +412,10 @@ def step_fill_identity_form(
         'button:has-text("sms")', 'button:has-text("SMS")',
         'button:has-text("인증번호 요청")', 'button:has-text("인증번호 전송")',
     ]
-    final_el = _find_first(page, ctx_frame, next_sel, timeout=3000)
+    final_el = _find_first(page, None, next_sel, timeout=2000)
     if final_el:
         _click_el(page, final_el)
         logger.info("Final Next/Continue clicked after CAPTCHA")
-        sleep(*DELAY_MEDIUM)
     else:
         logger.warning("Final button after CAPTCHA not found")
 
