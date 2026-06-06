@@ -230,6 +230,18 @@ class MainWindow(ctk.CTk):
             self._enable_controls()
             return
 
+        missing = []
+        if not result.name:
+            missing.append("name")
+        if not result.birthday:
+            missing.append("birthday")
+        if missing:
+            msg = f"Identity data incomplete: {', '.join(missing)} not found for this account"
+            self._log(f"Lookup failed: {msg}")
+            self._log("Lookup failed")
+            self._enable_controls()
+            return
+
         self._last_result = result
         self._log(f"Found: {result.name} | {result.phone} | {result.email}")
         self._log("Signing in...")
