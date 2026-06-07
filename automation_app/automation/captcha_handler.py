@@ -38,6 +38,30 @@ CAPTCHA_SELECTORS = [
 ]
 
 
+# Common "Try Again" button text for PlayNC CAPTCHA overlay
+RETRY_SELECTORS = [
+    "text=Try Again",
+    "text=다시 시도",
+    "button:has-text('Try Again')",
+    "button:has-text('다시 시도')",
+    '[class*="try-again"]',
+    '[class*="reload"]',
+    '[class*="refresh"]',
+]
+
+
+def retry_button_visible(page: Page) -> bool:
+    """Check if 'Try Again' button is visible without clicking."""
+    for sel in RETRY_SELECTORS:
+        try:
+            if page.locator(sel).first.is_visible(timeout=500):
+                logger.info("'Try Again' button visible: '%s'", sel)
+                return True
+        except Exception:
+            continue
+    return False
+
+
 def detect_captcha(page: Page) -> bool:
     """Check for actual CAPTCHA widgets. Returns True if found.
 

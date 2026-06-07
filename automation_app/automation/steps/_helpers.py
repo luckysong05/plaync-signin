@@ -10,7 +10,7 @@ from typing import Callable, Optional
 
 from playwright.sync_api import Page
 
-from ..captcha_handler import detect_captcha, wait_for_captcha_solve
+from ..captcha_handler import detect_captcha, retry_button_visible, wait_for_captcha_solve
 
 logger = logging.getLogger(__name__)
 
@@ -185,4 +185,13 @@ def _check_captcha(page: Page, on_captcha, captcha_solved, label="") -> bool:
     if not detect_captcha(page):
         return True
     logger.info("CAPTCHA detected%s", f" — {label}" if label else "")
+
+    # If "Try Again" button visible, bring browser to front for manual click
+    if retry_button_visible(page):
+        logger.info("'Try Again' button detected — bringing browser to front")
+        try:
+            page.bring_to_front()
+        except Exception:
+            pass
+
     return wait_for_captcha_solve(page, on_detected=on_captcha, solved_event=captcha_solved)

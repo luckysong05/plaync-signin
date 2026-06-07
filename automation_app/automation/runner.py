@@ -113,9 +113,18 @@ class Runner:
             if not self._wait_continue():
                 return
 
-            # Clear cookies so login page isn't redirected by old session
-            page.context.clear_cookies()
-            self.on_log("Session cleared for fresh login")
+            # Clear only NC session cookies so login page isn't redirected
+            # Keeps localStorage, cache, and non-NC cookies for fingerprint continuity
+            all_cookies = page.context.cookies()
+            nc_cookies = [c for c in all_cookies if "plaync.com" in c.get("domain", "")]
+            if nc_cookies:
+                page.context.clear_cookies()
+                non_nc = [c for c in all_cookies if "plaync.com" not in c.get("domain", "")]
+                if non_nc:
+                    page.context.add_cookies(non_nc)
+                self.on_log(f"Cleared NC session cookies, kept {len(non_nc)} non-NC cookies")
+            else:
+                self.on_log("No NC session cookies to clear")
 
             # --- Step 2: Full sign-in ---
             self.on_status("Signing in...")
